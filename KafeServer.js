@@ -8,26 +8,11 @@ class KafeServer extends BaseServer {
   }
 
   initRoutes() {
-    // this.app.get('/api/kafe', this.getKafeData.bind(this));
     this.app.get('/api/allCollections', this.getAllCollections.bind(this));
     this.app.get('/api/collections/:collectionName', this.getCollectionData.bind(this));
     this.app.get('/api/:collectionName/:id', this.getItemById.bind(this));
+    this.app.get('/api/promo', this.getPromoData.bind(this));
   }
-
-  // loadKafeData() {
-  //   const filePath = path.join(__dirname, 'kafe.json');
-  //   const data = fstat.readFileSync(filePath, 'utf-8');
-  //   return JSON.parse(data);
-  // }
-
-  // getKafeData(req, res) {
-  //   try {
-  //     const kafeFata = this.loadKafeData();
-  //     res.json(kafeData)
-  //   } catch (error) {
-  //     res.status(500).send('Error membaca data kafe');
-  //   }
-  // }
 
   async getAllCollections(req, res) {
     try {
@@ -76,6 +61,23 @@ class KafeServer extends BaseServer {
     } catch (error) {
       console.error('Error fetching item: ', error);
       res.status(500).json({ error: 'Gagal mendapatkan data item'});
+    }
+  }
+
+  async getPromoData(req, res) {
+    try {
+      const promoDB = mongoose.connection.useDb('KafePromo');
+      const promoCollection = promoDB.collection('Promo');
+      const promoData = await promoCollection.find({}).toArray();
+
+      if (!promoData) {
+        return res.status(404).json({ error: 'Item tidak ditemukan' });
+      }
+
+      res.json(promoData);
+    } catch(error) {
+      console.error('Error fetching promo data: ', error);
+      res.status(500).json({ error: 'Gagal mendapatkan data promo'});
     }
   }
 }
